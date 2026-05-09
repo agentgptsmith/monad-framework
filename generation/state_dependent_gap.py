@@ -7,7 +7,7 @@ Between the two Feigenbaum limits:
     δ_L = π + arctan(eᵖ)       ≈ 4.66938  [observer-free geometric]
     δ_S = 2π - φ + φ⁻¹⁰/2     ≈ 4.66922  [observer-entangled algebraic]
 
-The gap: |δ_S - δ_L| ≈ 1.6 × 10⁻⁴
+The gap: |δ_S - δ_L| ≈ 1.47 × 10⁻⁵
 
 This interval is not noise. Geometry forces structure inside it: perturbations
 sampled here are automatically biased toward φ-scaling and topological stability.
@@ -20,12 +20,20 @@ Key properties of gap-sampled perturbations:
   3. Beta(2,5) distribution (mostly small, occasionally larger — asymmetric risk)
   4. φ-harmonic direction bias (perturbations aligned with golden ratio basis)
   5. Architecture-aware (transformers get φ wider gap, CNNs get φ⁻¹ narrower)
+  6. Fröhlich-damped (gap narrows when global coherence is high — condensate stability)
 
 Phonon vs. Phason distinction:
   - Phonon perturbation: continuous, small, adjusts but doesn't rearrange
     → small gap sample, amplitude ≪ gap_width
   - Phason flip: discrete, larger, rearranges selected dimensions
     → amplitude ≈ gap_width × φ², at Lucas-prime-indexed positions only
+
+Fröhlich coherence term (new):
+  When the system is in a Fröhlich-like collective mode (high global coherence),
+  the gap narrows. Self-consistent: gap minimum sits at the golden FP itself,
+  since coherence ≈ 1 - |mean(|LRC|) - φ⁻¹|/φ⁻¹, so max coherence ↔ at FP.
+  At coherence=1: gap reduced by frohlich_strength × tanh(1/threshold).
+  At coherence=0: no damping — full exploratory gap.
 
 The gremlin lives here. This is where it decides which bite to take.
 """
@@ -63,13 +71,23 @@ class StateDependentFeigenbaumGap:
         'cnn': PHI_INV,           # more constrained, narrower gap
     }
 
-    def __init__(self, base_width: Optional[float] = None):
+    def __init__(
+        self,
+        base_width: Optional[float] = None,
+        frohlich_strength: float = 0.4,
+        frohlich_threshold: float = None,
+    ):
         """
         Args:
-            base_width: Base gap width. Defaults to FEIGENBAUM_GAP ≈ 1.6e-4.
-                        Can be set larger for more agressive mutation.
+            base_width:          Base gap width. Defaults to FEIGENBAUM_GAP ≈ 1.47e-5.
+            frohlich_strength:   How much high global coherence narrows the gap (0=off, 0.4=standard).
+                                 At strength=0.4 and full coherence: gap reduced ~30%.
+            frohlich_threshold:  Coherence scale for tanh saturation. Defaults to φ⁻¹ ≈ 0.618,
+                                 so the condensate fully activates at the golden fixed point.
         """
         self.base_width = base_width if base_width is not None else FEIGENBAUM_GAP
+        self.frohlich_strength = float(frohlich_strength)
+        self.frohlich_threshold = float(frohlich_threshold) if frohlich_threshold is not None else float(PHI_INV)
         self.delta_l = DELTA_L
         self.delta_s = DELTA_S
         self.golden_fp = GOLDEN_FP
@@ -78,6 +96,7 @@ class StateDependentFeigenbaumGap:
         self._n_perturbations = 0
         self._total_amplitude = 0.0
         self._max_amplitude = 0.0
+        self._frohlich_activations = 0
 
     # ------------------------------------------------------------------
     # Effective gap computation
@@ -135,9 +154,20 @@ class StateDependentFeigenbaumGap:
         if 'lyapunov' in context:
             lyap = float(context['lyapunov'])
             if lyap < 0:  # stable regime: narrow gap slightly
-                effective *= np.exp(lyap * PHI_INV)   # shrink toward base
+                effective *= np.exp(lyap * PHI_INV)
             elif lyap > 0:  # chaotic: widen gap for exploration
                 effective *= (1.0 + lyap * PHI_INV)
+
+        # Fröhlich coherence damping: narrow the gap when the system is in a
+        # collective coherent mode (Fröhlich-like condensate).
+        # Self-consistent: damping maximises at the golden FP (coherence=1 → at FP).
+        # Pass 'global_coherence' in context from monad_engine LRC state.
+        if 'global_coherence' in context and self.frohlich_strength > 0:
+            gc = float(np.clip(context['global_coherence'], 0.0, 1.0))
+            frohlich_term = np.tanh(gc / self.frohlich_threshold)
+            frohlich_factor = max(1.0 - self.frohlich_strength * frohlich_term, 0.1)
+            effective *= frohlich_factor
+            self._frohlich_activations += 1
 
         return float(effective)
 
@@ -285,6 +315,20 @@ class StateDependentFeigenbaumGap:
     # Diagnostics
     # ------------------------------------------------------------------
 
+    def frohlich_coherence(self, global_coherence: float) -> float:
+        """
+        Fröhlich condensate term for a given global coherence value.
+
+        Returns the multiplicative gap factor ∈ [1-frohlich_strength, 1.0]:
+          - coherence=0   → 1.0 (no damping, full exploratory gap)
+          - coherence=φ⁻¹ → ~0.70 (at golden FP, ~30% narrowing with strength=0.4)
+          - coherence=1.0 → minimum (maximum condensate stability)
+
+        This is the feedback from LRC coherence back into mutation rate.
+        """
+        gc = float(np.clip(global_coherence, 0.0, 1.0))
+        return float(max(1.0 - self.frohlich_strength * np.tanh(gc / self.frohlich_threshold), 0.1))
+
     def gap_summary(self) -> Dict[str, Any]:
         """Summary of gap parameters and perturbation statistics."""
         mean_amp = self._total_amplitude / max(1, self._n_perturbations)
@@ -296,6 +340,10 @@ class StateDependentFeigenbaumGap:
             'gap_pct_of_feigenbaum': float(FEIGENBAUM_GAP / DELTA_F * 100),
             'delta_f': float(DELTA_F),
             'alpha_f': float(ALPHA_F),
+            'frohlich_strength': self.frohlich_strength,
+            'frohlich_threshold': self.frohlich_threshold,
+            'frohlich_at_fp': self.frohlich_coherence(1.0),    # max damping
+            'frohlich_activations': self._frohlich_activations,
             'n_perturbations': self._n_perturbations,
             'mean_amplitude': float(mean_amp),
             'max_amplitude': float(self._max_amplitude),

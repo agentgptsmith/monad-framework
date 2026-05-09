@@ -82,6 +82,7 @@ class MONADEngine:
         lock_mode: str = 'top_k',
         dt: float = 0.1,
         hrv_coupling: bool = True,
+        frohlich_strength: float = 0.4,
     ):
         """
         Args:
@@ -110,9 +111,10 @@ class MONADEngine:
         )
         self.torus = TorusProtectionLayer(dim=dim, max_logical_states=32)
 
-        # ── Layer 2: Generation (Feigenbaum gap) ───────────────────────
+        # ── Layer 2: Generation (Feigenbaum gap + Fröhlich damping) ───
         self.gap = StateDependentFeigenbaumGap(
-            base_width=gap_base_width or FEIGENBAUM_GAP
+            base_width=gap_base_width or FEIGENBAUM_GAP,
+            frohlich_strength=frohlich_strength,
         )
 
         # ── Layer 3: Detection (closure) ────────────────────────────────
@@ -205,6 +207,11 @@ class MONADEngine:
                 last_cl = self._closure_history[-1]
                 closure_ctx['in_closure_loop'] = last_cl.get('in_closure_loop', False)
                 closure_ctx['loop_depth'] = last_cl.get('loop_depth', 0)
+
+            # Fröhlich: pass current global coherence into gap computation.
+            # Measured from LRC state before perturbation (correct causal order).
+            lrc_pre = (self.lrc.L + self.lrc.R + self.lrc.C) / 3.0
+            closure_ctx['global_coherence'] = float(self.cooling.global_coherence(lrc_pre))
 
             # Temporarily override gap base with HRV-modulated value
             original_base = self.gap.base_width
@@ -393,6 +400,12 @@ class MONADEngine:
             'phason_width': float(phason_w),
             'phason_base': float(self.gap.base_width),
             'hrv_coupling': self.hrv_coupling,
+            'frohlich_strength': self.gap.frohlich_strength,
+            'frohlich_at_coherence': self.gap.frohlich_coherence(
+                self.cooling.global_coherence(
+                    (self.lrc.L + self.lrc.R + self.lrc.C) / 3.0
+                )
+            ),
 
             # ── Contact geometry ──
             'contact_density': lrc_summary['contact_density'],
