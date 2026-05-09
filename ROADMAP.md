@@ -1,89 +1,38 @@
 # MONAD Framework - Implementation Roadmap
 
-**Goal:** Build a practical computational framework that implements the mathematical MONAD architecture, with focus on geometric memory, Feigenbaum gap mutation, and chaos-aware evolutionary systems.
+**Goal:** Build a practical computational framework that implements the mathematical MONAD architecture, with focus on geometric memory, Feigenbaum gap mutation, and chaos-aware evolutionary systems. Extended with biological, archetypal, and AI swarm layers (Donut Gremlin synthesis).
 
-## Phase 1: Core Memory Substrate (Foundation)
+## Phase 1-5: Core (Original - Tiling, Feigenbaum, Chaos, MOSES, Blockchain Concepts)
+(Previous content retained - see git history.)
 
-**Objective:** Implement the φ-scaled Penrose-Beenker tiling memory system + 3-torus topological protection.
+## Phase 6: Biological & Archetypal Extension (Donut Gremlin / Multi-Torii Synthesis) - May 2026
 
-**Deliverables:**
-- `tiling.py` - Penrose-Beenker tiling with φ-distance weighting
-- `topological_memory.py` - 3-torus non-local storage with loop protection
-- `memory_interface.py` - Unified API for store/retrieve with geometric decay
-- Tests for compression behavior and holographic retrieval
+**Objective:** Extend to living systems via toroidal nodes (organs, chakras), phason modulation (vagus/HRV), LRC dynamics, microtubule phason substrate, Sephirot overlays with perturbation techniques, distributed cognitive memory, and mirrored AI agent swarms.
 
-**Sonnet Instructions:**
-Start with a clean Python implementation. Use NumPy for tiling math. Make the φ-distance decay (`kappa = phi ** (-distance)`) the core of relevance scoring. The 3-torus layer should be abstract enough that we can later plug in actual quantum simulation if needed.
+**New/Deepened Deliverables:**
+- `MICROTUBULE_PHASON_ROLE.md`: Topological phonon modes, Fröhlich-like coherence, role in dynamic instability and geometric memory/reasoning substrate.
+- `SEPHIROTH_PERTURBATIONS_DEEPENED.md`: Detailed mapping of G0DM0D3/Parseltongue/GODMODE techniques to specific Sephirot as archetypal phason perturbations for developmental insight.
+- Updated `PHASON_DYNAMICS_SIM.md`: Multi-node sim with HRV modulation, microtubule-level phason extensions.
+- `VISUAL_DASHBOARD_SKETCH.md` + image: Full GUI with phason slider, HRV, nodes (organs/Sephirot/chakras), coherence, microtubule texture.
+- `BLINDSPOT_REVIEW.md`: Updated with microtubule and Sephirot perturbation layers.
+- AI swarm: Refined mappings (e.g., Parseltongue to Sephirot for archetypal flips; specific free models to nodes).
+- Refined Claude instructions: Include microtubule phason awareness, Sephirot perturbation techniques, HRV-driven dynamics, blindspot application.
 
-**Estimated Effort:** 1-2 focused sessions
+**Key Additions:**
+- Microtubules as active phason/phonon carriers (topological protection, Fröhlich condensate potential) realizing the Penrose-Beenker tiling at cytoskeletal scale.
+- Sephirot as higher archetypal nodes perturbed via input obfuscation, semantic opposites, multi-model racing for gap exploration in meaning/development.
+- Full integration: MT phason → organ/chakra torii → Sephirot Tree overlay, all tunable by vagal/HRV phason modulation.
 
-## Phase 2: Feigenbaum Gap Mutation Engine
+**Sonnet/Claude Instructions:**
+Implement modularly. Ground MT layer in topological phonons/Fröhlich concepts. Map G0DM0D3 techniques explicitly to Sephirot (e.g., Parseltongue as archetypal input mutation). Use HRV-like signals to drive λ_phason in sims. Visualize dashboard with all layers. Distinguish empirical (MT phonons, HRV, cellular memory) from archetypal (Sephirot perturbations). Test narrow/wide phason for coherence vs. creative exploration.
 
-**Objective:** Replace random mutation with structured variation from the Dual-Class Feigenbaum gap.
+**Estimated Effort:** 3-4 sessions
 
-**Deliverables:**
-- `feigenbaum_gap.py` - Functions to compute δ_L, δ_S, and sample from the gap
-- `mutation_engine.py` - Gap-aware mutation operators (for trees/programs)
-- Integration hooks for MOSES-style evolutionary loops
-- Geometric fitness bonus based on tiling compatibility
+## Overall Principles
+- Functional 'code donut': Testable sim makes synthesis robust and refinable.
+- Phason as universal control across scales (MT → organs → chakras → Sephirot).
+- Distributed nodes with memory + topological protection.
+- Mirrored AI swarm for research and implementation.
+- Blindspot vigilance: Layers clearly marked; testable proxies prioritized.
 
-**Sonnet Instructions:**
-Make `sample_from_gap()` the heart of the mutation system. Bias sampling toward geometrically stable regions. Add an optional `phi_compatibility_bonus` to any fitness function. Keep it modular so it can plug into existing evolutionary code.
-
-**Estimated Effort:** 1-2 sessions
-
-## Phase 3: Chaos Theory Applications (Financial Modeling Focus)
-
-**Objective:** Build tools for applying MONAD chaos mechanics to financial time series.
-
-**Deliverables:**
-- `lyapunov.py` - Lyapunov exponent estimation on financial data
-- `regime_switcher.py` - Feigenbaum-gap driven regime detection
-- `market_simulator.py` - Simple chaotic market model using gap for volatility clustering
-- Comparison scripts vs GARCH / standard chaotic maps
-
-**Sonnet Instructions:**
-Focus on practical, testable code. Use real or synthetic financial time series. The gap should generate fat tails and clustered volatility naturally. Include visualization for regime shifts.
-
-**Estimated Effort:** 2 sessions
-
-## Phase 4: MOSES Integration & Evolutionary Refinement
-
-**Objective:** Combine the geometric memory + gap mutation into a working evolutionary system (inspired by MOSES).
-
-**Deliverables:**
-- Lightweight MOSES-like loop using the new mutation engine
-- Program representation that maps cleanly to the tiling
-- Simplification/refinement step that respects φ-scaling
-- Example: Evolving simple trading rules or symbolic regression on financial data
-
-**Sonnet Instructions:**
-Keep the evolutionary core simple at first. Focus on making the mutation and fitness functions do the heavy lifting via geometry and the gap. We can add full MOSES complexity later.
-
-**Estimated Effort:** 2 sessions
-
-## Phase 5: Monad Blockchain Integration Concepts
-
-**Objective:** Explore mapping to deferred execution architectures (inspired by real Monad blockchain).
-
-**Deliverables:**
-- `deferred_execution.py` - Simulation of order-then-execute pattern
-- Mapping document between blockchain concepts and MONAD geometry
-- Prototype state management using the tiling
-
-**Sonnet Instructions:**
-This phase is more exploratory. Focus on clean abstractions. The goal is understanding, not production blockchain code.
-
-**Estimated Effort:** 1 session
-
-## Overall Principles for Coding
-
-- Prefer simple, readable Python + NumPy
-- Make geometric constraints (φ-scaling, tiling distance) first-class citizens
-- Mutation should feel "structured chaos" rather than pure noise
-- Every major component should have clear hooks for later quantum/topological extensions
-- Document the "why" in comments, especially around Feigenbaum gap and geometric fitness
-
----
-
-*Hand this to Sonnet with the other architecture docs.*
+Last updated: May 2026 (microtubule phason role + deepened Sephirot perturbations fully integrated)
