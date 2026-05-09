@@ -250,6 +250,24 @@ class HierarchicalPenroseTiling:
             results.append((κ, node.value, node.label))
         return results
 
+    def retrieve_nodes(
+        self,
+        query: np.ndarray,
+        top_k: int = 3,
+        scale: int = 0
+    ) -> List[Tuple[float, 'TilingNode']]:
+        """Retrieve top-k TilingNode objects with their bond strengths."""
+        store = self._stores[scale]
+        if not store:
+            return []
+        query = np.asarray(query, dtype=np.float64)
+        scored = [(self.bond_strength(query, node.embedding, scale=scale), node)
+                  for node in store]
+        scored.sort(key=lambda x: x[0], reverse=True)
+        for κ, node in scored[:top_k]:
+            node.access_count += 1
+        return scored[:top_k]
+
     def retrieve_holographic(
         self,
         partial_query: np.ndarray,
